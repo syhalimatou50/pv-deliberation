@@ -83,8 +83,7 @@ Route::middleware(['auth', 'etudiant'])->group(function () {
 // Route accessible aussi par enseignant
 Route::middleware(['auth'])->group(function () {
     Route::resource('absences', \App\Http\Controllers\AbsenceController::class)->except(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-});
-// Route temporaire pour créer l'admin
+    // Route temporaire pour créer l'admin
 Route::get('/create-admin-temp', function () {
     if (\App\Models\User::where('email', 'admin@pv.com')->exists()) {
         return 'Admin existe déjà !';
@@ -98,4 +97,5 @@ Route::get('/create-admin-temp', function () {
     ]);
     
     return 'Admin créé avec succès !';
+});
 });
