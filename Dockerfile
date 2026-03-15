@@ -1,6 +1,6 @@
 ﻿FROM php:8.2-cli
 
-# Install system dependencies AND PostgreSQL libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip
 
-# Install PHP extensions (pdo_pgsql instead of pdo_mysql for PostgreSQL)
+# Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Get Composer
@@ -27,15 +27,11 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
-
-# Create startup script with migrations
-RUN echo '#!/bin/bash' > /start.sh && \
-    echo 'php artisan migrate --force' >> /start.sh && \
-    echo 'php artisan serve --host=0.0.0.0 --port=8080' >> /start.sh && \
-    chmod +x /start.sh
+# Create storage directories and set permissions
+RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
+RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8080
 
-CMD ["/start.sh"]
+# Run migrations then start server (inline command)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
