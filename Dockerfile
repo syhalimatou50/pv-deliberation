@@ -29,8 +29,12 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configure Nginx
-COPY nginx.conf /etc/nginx/sites-available/default
+# Remove default Nginx config
+RUN rm -f /etc/nginx/sites-enabled/default
+RUN rm -f /etc/nginx/sites-available/default
+
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Start script
 COPY start.sh /start.sh
