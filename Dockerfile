@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     unzip
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -29,7 +29,11 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
+# Create startup script
+RUN echo '#!/bin/bash\nphp artisan migrate --force\nphp artisan serve --host=0.0.0.0 --port=8080' > /start.sh
+RUN chmod +x /start.sh
+
 EXPOSE 8080
 
-# Start PHP built-in server
-CMD php artisan serve --host=0.0.0.0 --port=8080
+# Start with migrations
+CMD ["/start.sh"]
